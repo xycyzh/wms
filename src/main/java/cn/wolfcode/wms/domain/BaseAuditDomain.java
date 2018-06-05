@@ -37,4 +37,8 @@ public class BaseAuditDomain extends BaseDomain {
      * 审核人
      */
     private Employee auditor;
+    /**
+     * 测试
+     */
+    private Employee employee;
 }
