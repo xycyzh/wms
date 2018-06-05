@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.wms.mapper.OrderBillItemMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.wms.domain.OrderBillItem">
+        <id column="id" property="id"/>
+        <result column="costPrice" property="costPrice"/>
+        <result column="number" property="number"/>
+        <result column="amount" property="amount"/>
+        <result column="remark" property="remark"/>
+        <result column="bill_id" property="bill_id"/>
+        <association property="product" javaType="cn.wolfcode.wms.domain.Product" columnPrefix="p_">
+            <id column="id" property="id"/>
+            <result column="name" property="name"/>
+            <result column="brand_id" property="brand_id"/>
+            <result column="brandName" property="brandName"/>
+        </association>
+    </resultMap>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `orderbillitem` (costPrice, number, amount, remark, product_id, bill_id)
+        VALUES (#{costPrice}, #{number}, #{amount}, #{remark}, #{product.id}, #{bill_id})
+    </insert>
+    <delete id="deleteByOrderId">
+        DELETE FROM orderbillitem
+        WHERE bill_id = #{orderBillId}
+    </delete>
+    <select id="selectByOrderId" resultMap="BaseResultMap">
+        SELECT
+            item.id,
+            item.costPrice,
+            item.number,
+            item.amount,
+            item.remark,
+            item.bill_id,
+            p.id        AS p_id,
+            p.name      AS p_name,
+            p.brand_id  AS p_brand_id,
+            p.brandName AS p_brandName
+        FROM orderbillitem item
+            JOIN product p ON item.product_id = p.id
+        WHERE item.bill_id = #{id};
+    </select>
+</mapper>

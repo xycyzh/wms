@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.wms.mapper.StockIncomeBillMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.wms.domain.StockIncomeBill">
+        <id column="id" property="id"/>
+        <result column="sn" property="sn"/>
+        <result column="vdate" property="vdate"/>
+        <result column="status" property="status"/>
+        <result column="totalAmount" property="totalAmount"/>
+        <result column="totalNumber" property="totalNumber"/>
+        <result column="auditTime" property="auditTime"/>
+        <result column="inputTime" property="inputTime"/>
+        <association property="inputUser" javaType="cn.wolfcode.wms.domain.Employee" columnPrefix="iu_">
+            <id column="id" property="id"/>
+            <result column="name" property="name"/>
+        </association>
+        <association property="auditor" javaType="cn.wolfcode.wms.domain.Employee" columnPrefix="au_">
+            <id column="id" property="id"/>
+            <result column="name" property="name"/>
+        </association>
+        <association property="depot" javaType="cn.wolfcode.wms.domain.Depot" columnPrefix="d_">
+            <id column="id" property="id"/>
+            <result column="name" property="name"/>
+        </association>
+        <collection property="stockIncomeBillItems" column="id"
+                    select="cn.wolfcode.wms.mapper.StockIncomeBillItemMapper.selectByStockIncomeBillId"/>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        DELETE FROM `stockincomebill`
+        WHERE id = #{id}
+    </delete>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `stockincomebill` (sn, vdate, status, totalAmount, totalNumber, auditTime,
+                                       inputTime, inputUser_id, auditor_id, depot_id)
+        VALUES (#{sn}, #{vdate}, #{status}, #{totalAmount}, #{totalNumber}, #{auditTime},
+                #{inputTime}, #{inputUser.id}, #{auditor.id}, #{depot.id})
+    </insert>
+    <update id="updateByPrimaryKey">
+        UPDATE `stockincomebill`
+        SET sn          = #{sn},
+            vdate       = #{vdate},
+            totalAmount = #{totalAmount},
+            totalNumber = #{totalNumber},
+            depot_id    = #{depot.id}
+        WHERE id = #{id}
+    </update>
+    <update id="audit">
+        UPDATE stockincomebill
+        SET status     = #{status},
+            auditTime  = #{auditTime},
+            auditor_id = #{auditor.id}
+        WHERE id = #{id};
+    </update>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+        SELECT
+            sb.id,
+            sb.sn,
+            sb.vdate,
+            sb.status,
+            sb.totalAmount,
+            sb.totalNumber,
+            sb.auditTime,
+            sb.inputTime,
+            sb.inputUser_id,
+            sb.auditor_id,
+            d.id   AS d_id,
+            d.name AS d_name
+        FROM `stockincomebill` sb
+            JOIN depot d ON sb.depot_id = d.id
+        WHERE sb.id = #{id}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+            id,
+            sn,
+            vdate,
+            status,
+            totalAmount,
+            totalNumber,
+            auditTime,
+            inputTime,
+            inputUser_id,
+            auditor_id,
+            depot_id
+        FROM `stockincomebill`
+    </select>
+    <select id="queryForCount" resultType="int">
+        SELECT count(sb.id)
+        FROM stockincomebill sb
+        JOIN employee iu ON sb.inputUser_id = iu.id
+        LEFT JOIN employee au ON sb.auditor_id = au.id
+        JOIN depot d ON sb.depot_id = d.id<include refid="base_where"/>;
+    </select>
+    <select id="queryForList" resultMap="BaseResultMap">
+        SELECT
+        sb.id,
+        sb.sn,
+        sb.vdate,
+        sb.status,
+        sb.totalAmount,
+        sb.totalNumber,
+        sb.auditTime,
+        sb.inputTime,
+        iu.id AS iu_id,
+        iu.name AS iu_name,
+        au.id AS au_id,
+        au.name AS au_name,
+        d.id AS d_id,
+        d.name AS d_name
+        FROM stockincomebill sb
+        JOIN employee iu ON sb.inputUser_id = iu.id
+        LEFT JOIN employee au ON sb.auditor_id = au.id
+        JOIN depot d ON sb.depot_id = d.id
+        <include refid="base_where"/>
+        LIMIT #{startIndex}, #{pageSize};
+    </select>
+
+    <sql id="base_where">
+        <where>
+            <if test="beginDate!=null">
+                AND sb.vdate &gt;= #{beginDate}
+            </if>
+            <if test="endDate!=null">
+                AND sb.vdate &lt;=#{endDate}
+            </if>
+            <if test="depotId>-1">
+                AND d.id=#{depotId}
+            </if>
+            <if test="status>-1">
+                AND sb.status=#{status}
+            </if>
+        </where>
+    </sql>
+</mapper>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.wms.mapper.StockIncomeBillItemMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.wms.domain.StockIncomeBillItem">
+        <id column="id" property="id"/>
+        <result column="costPrice" property="costPrice"/>
+        <result column="number" property="number"/>
+        <result column="amount" property="amount"/>
+        <result column="remark" property="remark"/>
+        <result column="bill_id" property="bill_id"/>
+        <association property="product" javaType="cn.wolfcode.wms.domain.Product" columnPrefix="p_">
+            <id column="id" property="id"/>
+            <result column="name" property="name"/>
+            <result column="brandName" property="brandName"/>
+        </association>
+    </resultMap>
+    <insert id="insert" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO `stockincomebillitem` (costPrice, number, amount, remark, product_id, bill_id)
+        VALUES (#{costPrice}, #{number}, #{amount}, #{remark}, #{product.id}, #{bill_id})
+    </insert>
+    <delete id="deleteByStockIncomeBillId">
+        DELETE FROM stockincomebillitem
+        WHERE bill_id = #{stockIncomeBillId}
+    </delete>
+    <select id="selectByStockIncomeBillId" resultMap="BaseResultMap">
+        SELECT
+            sb.id,
+            sb.bill_id,
+            sb.costPrice,
+            sb.number,
+            sb.amount,
+            sb.remark,
+            p.id        AS p_id,
+            p.name      AS p_name,
+            p.brandName AS p_brandName
+        FROM stockincomebillitem sb
+            JOIN product p ON sb.product_id = p.id
+        WHERE sb.bill_id = #{stockIncomeBillId};
+    </select>
+</mapper>

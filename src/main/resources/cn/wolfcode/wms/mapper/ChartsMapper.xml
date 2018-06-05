@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.wms.mapper.ChartsMapper">
+    <select id="queryOrderCharts" resultType="map">
+        SELECT
+        ${groupBy} groupType,
+        SUM(item.number) totalNumber,
+        SUM(item.amount) totalAmount
+        FROM
+        orderbill bill
+        JOIN orderbillitem item ON bill.id = item.bill_id
+        JOIN employee e ON bill.inputUser_id = e.id
+        JOIN product p ON item.product_id = p.id
+        JOIN supplier s ON bill.supplier_id = s.id
+        <include refid="base_order_where"/>
+        GROUP BY groupType
+    </select>
+    <select id="querySaleCharts" resultType="map">
+        SELECT
+        ${groupBy} groupType,
+        SUM(sa.number) AS totalNumber,
+        SUM(sa.saleAmount) AS totalAmount,
+        SUM(sa.saleAmount - sa.costAmount) AS grossProfit
+        FROM saleaccount sa
+        JOIN employee e ON sa.saleman_id = e.id
+        JOIN product p ON sa.product_id = p.id
+        JOIN client c ON sa.client_id = c.id
+        <include refid="base_sale_where"/>
+        GROUP BY groupType;
+    </select>
+    <sql id="base_order_where">
+        <where>
+            bill.status = 1
+            <if test="beginDate!=null">
+                AND bill.vdate &gt;= #{beginDate}
+            </if>
+            <if test="endDate!=null">
+                AND bill.vdate &lt;= #{endDate}
+            </if>
+            <if test="supplierId>-1">
+                AND s.id = #{supplierId}
+            </if>
+            <if test="brandId>-1">
+                AND p.brand_id = #{brandId}
+            </if>
+        </where>
+    </sql>
+    <sql id="base_sale_where">
+        <where>
+            <if test="beginDate!=null">
+                AND sa.vdate &gt;= #{beginDate}
+            </if>
+            <if test="endDate!=null">
+                AND sa.vdate &lt;= #{endDate}
+            </if>
+            <if test="clientId>-1">
+                AND c.id = #{clientId}
+            </if>
+            <if test="brandId>-1">
+                AND p.brand_id = #{brandId}
+            </if>
+        </where>
+    </sql>
+</mapper>

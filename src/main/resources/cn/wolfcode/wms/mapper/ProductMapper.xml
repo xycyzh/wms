@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.wms.mapper.ProductMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.wms.domain.Product">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="sn" property="sn"/>
+        <result column="costPrice" property="costPrice"/>
+        <result column="salePrice" property="salePrice"/>
+        <result column="imagePath" property="imagePath"/>
+        <result column="intro" property="intro"/>
+        <result column="brand_id" property="brand_id"/>
+        <result column="brandName" property="brandName"/>
+    </resultMap>
+    <delete id="deleteByPrimaryKey">
+        DELETE FROM `product`
+        WHERE id = #{id}
+    </delete>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `product` (name, sn, costPrice, salePrice, imagePath, intro, brand_id,
+                               brandName)
+        VALUES (#{name}, #{sn}, #{costPrice}, #{salePrice}, #{imagePath}, #{intro}, #{brand_id},
+                #{brandName})
+    </insert>
+    <update id="updateByPrimaryKey">
+        UPDATE `product`
+        SET name      = #{name},
+            sn        = #{sn},
+            costPrice = #{costPrice},
+            salePrice = #{salePrice},
+            imagePath = #{imagePath},
+            intro     = #{intro},
+            brand_id  = #{brand_id},
+            brandName = #{brandName}
+        WHERE id = #{id}
+    </update>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+        SELECT
+            id,
+            name,
+            sn,
+            costPrice,
+            salePrice,
+            imagePath,
+            intro,
+            brand_id,
+            brandName
+        FROM `product`
+        WHERE id = #{id}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+            id,
+            name,
+            sn,
+            costPrice,
+            salePrice,
+            imagePath,
+            intro,
+            brand_id,
+            brandName
+        FROM `product`
+    </select>
+    <select id="queryForCount" resultType="int">
+        SELECT count(id)
+        FROM product
+        <include refid="base_sql"/>;
+    </select>
+    <select id="queryForList" resultType="product">
+        SELECT
+        id,
+        name,
+        sn,
+        costPrice,
+        salePrice,
+        imagePath,
+        intro,
+        brand_id,
+        brandName
+        FROM product
+        <include refid="base_sql"/>
+        LIMIT #{startIndex}, #{pageSize};
+    </select>
+    <sql id="base_sql">
+        <where>
+            <if test="keyword!=null and keyword!=''">
+                AND (name like concat('%',#{keyword},'%') or brandName like concat('%',#{keyword},'%'))
+            </if>
+            <if test="brandId>0">
+                AND brand_id = #{brandId}
+            </if>
+        </where>
+    </sql>
+</mapper>

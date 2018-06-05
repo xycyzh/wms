@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.wms.mapper.SystemMenuMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.wms.domain.SystemMenu">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="url" property="url"/>
+        <result column="sn" property="sn"/>
+        <association property="parent" javaType="cn.wolfcode.wms.domain.SystemMenu" columnPrefix="p_">
+            <id property="id" column="id"/>
+            <result property="name" column="name"/>
+            <result property="sn" column="sn"/>
+        </association>
+    </resultMap>
+    <resultMap id="BaseResultMap1" type="cn.wolfcode.wms.domain.SystemMenu">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="url" property="url"/>
+        <result column="sn" property="sn"/>
+        <association property="parent" column="parent_id" select="selectByPrimaryKey1"/>
+    </resultMap>
+    <delete id="deleteByPrimaryKey">
+        DELETE FROM `systemmenu`
+        WHERE id = #{id}
+    </delete>
+    <delete id="deleteByParentId">
+        DELETE FROM systemmenu
+        WHERE id = #{parentId}
+    </delete>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `systemmenu` (name, url, sn, parent_id)
+        VALUES (#{name}, #{url}, #{sn}, #{parent.id})
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="cn.wolfcode.wms.domain.SystemMenu">
+        UPDATE `systemmenu`
+        SET name      = #{name},
+            url       = #{url},
+            sn        = #{sn},
+            parent_id = #{parent.id}
+        WHERE id = #{id}
+    </update>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+        SELECT
+            child.id,
+            child.name,
+            child.url,
+            child.sn,
+            parent.id   AS p_id,
+            parent.name AS p_name,
+            parent.sn   AS p_sn
+        FROM systemmenu child LEFT JOIN systemmenu parent ON child.parent_id = parent.id
+        WHERE child.id = #{id}
+    </select>
+    <select id="selectByPrimaryKey1" resultMap="BaseResultMap1">
+        SELECT
+            id,
+            name,
+            url,
+            sn,
+            parent_id
+        FROM systemmenu
+        WHERE id = #{id}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+            id,
+            name,
+            url,
+            sn,
+            parent_id
+        FROM `systemmenu`
+        WHERE parent_id IS NOT NULL
+    </select>
+    <select id="queryForCount" resultType="int">
+        SELECT count(child.id)
+        FROM systemmenu child LEFT JOIN systemmenu parent ON child.parent_id = parent.id
+        <include refid="base_where"/>;
+    </select>
+    <select id="queryForList" resultMap="BaseResultMap">
+        SELECT
+        child.id,
+        child.name,
+        child.url,
+        child. sn,
+        parent.id AS p_id,
+        parent.name AS p_name,
+        parent.sn AS p_sn
+        FROM systemmenu child LEFT JOIN systemmenu parent ON child.parent_id = parent.id
+        <include refid="base_where"/>
+        LIMIT #{startIndex}, #{pageSize};
+    </select>
+    <select id="selectByParentId" resultType="systemMenu">
+        SELECT
+            id,
+            name,
+            url,
+            sn
+        FROM systemmenu
+        WHERE parent_id = #{parentId};
+    </select>
+    <select id="loadMenuByParentSn" resultType="cn.wolfcode.wms.vo.SystemMenuVO">
+        SELECT
+            child.id,
+            child.parent_id AS pId,
+            child.name,
+            child.url       AS action
+        FROM systemmenu child
+            JOIN systemmenu parent ON child.parent_id = parent.id
+        WHERE parent.sn = #{parentSn};
+    </select>
+    <select id="querySystemMenuByRoleId" resultType="systemMenu">
+        SELECT
+            id,
+            name,
+            url,
+            sn,
+            parent_id
+        FROM systemmenu
+        WHERE id IN (SELECT menu_id
+                     FROM role_menu
+                     WHERE role_id = #{roleId});
+    </select>
+    <select id="querySystemMenuByEmployeeIdAndSn" resultType="cn.wolfcode.wms.vo.SystemMenuVO">
+        SELECT
+            child.id,
+            child.parent_id AS pId,
+            child.name,
+            child.url       AS action
+        FROM systemmenu child
+            JOIN systemmenu parent ON child.parent_id = parent.id
+            JOIN role_menu rm ON child.id = rm.menu_id
+            JOIN employee_role er ON rm.role_id = er.role_id
+        WHERE er.employee_id = #{employeeId} AND parent.sn = #{parentSn};
+    </select>
+    <sql id="base_where">
+        <where>
+            <choose>
+                <when test="parentId==null">
+                    AND child.parent_id IS NULL
+                </when>
+                <otherwise>
+                    AND child.parent_id = #{parentId}
+                </otherwise>
+            </choose>
+        </where>
+    </sql>
+</mapper>

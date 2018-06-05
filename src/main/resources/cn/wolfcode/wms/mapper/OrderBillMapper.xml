@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.wms.mapper.OrderBillMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.wms.domain.OrderBill">
+        <id column="id" property="id"/>
+        <result column="sn" property="sn"/>
+        <result column="vdate" property="vdate"/>
+        <result column="status" property="status"/>
+        <result column="totalAmount" property="totalAmount"/>
+        <result column="totalNumber" property="totalNumber"/>
+        <result column="auditTime" property="auditTime"/>
+        <result column="inputTime" property="inputTime"/>
+        <association property="inputUser" javaType="cn.wolfcode.wms.domain.Employee" columnPrefix="iu_">
+            <id property="id" column="id"/>
+            <result property="name" column="name"/>
+        </association>
+        <association property="auditor" javaType="cn.wolfcode.wms.domain.Employee" columnPrefix="au_">
+            <id property="id" column="id"/>
+            <result property="name" column="name"/>
+        </association>
+        <association property="supplier" javaType="cn.wolfcode.wms.domain.Supplier" columnPrefix="su_">
+            <id property="id" column="id"/>
+            <result property="name" column="name"/>
+        </association>
+        <collection property="orderBillItems" ofType="cn.wolfcode.wms.domain.OrderBillItem" column="id"
+                    select="cn.wolfcode.wms.mapper.OrderBillItemMapper.selectByOrderId"/>
+    </resultMap>
+    <delete id="deleteByPrimaryKey">
+        DELETE FROM `orderbill`
+        WHERE id = #{id}
+    </delete>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `orderbill` (sn, vdate, status, totalAmount, totalNumber, auditTime,
+        inputTime, inputUser_id, auditor_id, supplier_id)
+        VALUES (#{sn}, #{vdate}, #{status}, #{totalAmount}, #{totalNumber}, #{auditTime},
+        #{inputTime}, #{inputUser.id}, #{auditor.id}, #{supplier.id})
+    </insert>
+    <update id="updateByPrimaryKey">
+        UPDATE `orderbill`
+        SET sn          = #{sn},
+        vdate       = #{vdate},
+        totalAmount = #{totalAmount},
+        totalNumber = #{totalNumber},
+        supplier_id = #{supplier.id}
+        WHERE id = #{id}
+    </update>
+    <update id="audit" parameterType="orderBill">
+        UPDATE `orderbill`
+        SET status     = #{status},
+        auditor_id = #{auditor.id},
+        auditTime  = #{auditTime}
+        WHERE id = #{id}
+    </update>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+        SELECT
+        ob.id,
+        ob.sn,
+        ob.vdate,
+        ob.status,
+        ob.totalAmount,
+        ob.totalNumber,
+        ob.auditTime,
+        ob.inputTime,
+        su.id   AS su_id,
+        su.name AS su_name
+        FROM `orderbill` ob
+        JOIN supplier su ON ob.supplier_id = su.id
+        WHERE ob.id = #{id}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+        id,
+        sn,
+        vdate,
+        status,
+        totalAmount,
+        totalNumber,
+        auditTime,
+        inputTime,
+        inputUser_id,
+        auditor_id,
+        supplier_id
+        FROM `orderbill`
+    </select>
+    <select id="queryForCount" resultType="int">
+        SELECT count(ob.id)
+        FROM `orderbill` ob
+        JOIN employee iu ON ob.inputUser_id = iu.id
+        LEFT JOIN employee au ON ob.auditor_id = au.id
+        JOIN employee su ON ob.supplier_id = su.id
+        <include refid="base_where"/>;
+    </select>
+    <select id="queryForList" resultMap="BaseResultMap">
+        SELECT
+        ob.id,
+        ob.sn,
+        ob.vdate,
+        ob.status,
+        ob.totalAmount,
+        ob.totalNumber,
+        ob.auditTime,
+        ob.inputTime,
+        iu.id AS iu_id,
+        iu.name AS iu_name,
+        au.id AS au_id,
+        au.name AS au_name,
+        su.id AS su_id,
+        su.name AS su_name
+        FROM `orderbill` ob
+        JOIN employee iu ON ob.inputUser_id = iu.id
+        LEFT JOIN employee au ON ob.auditor_id = au.id
+        JOIN supplier su ON ob.supplier_id = su.id
+        <include refid="base_where"/>
+        LIMIT #{startIndex}, #{pageSize}
+    </select>
+    <sql id="base_where">
+        <where>
+            <if test="beginDate!=null">
+                AND ob.vdate &gt;=#{beginDate}
+            </if>
+            <if test="endDate!=null">
+                AND ob.vdate &lt;=#{endDate}
+            </if>
+            <if test="supplierId>-1">
+                AND su.id =#{supplierId}
+            </if>
+            <if test="status>-1">
+                AND ob.status =#{status}
+            </if>
+        </where>
+    </sql>
+</mapper>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.wms.mapper.PermissionMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.wms.domain.Permission">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="expression" property="expression"/>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        DELETE FROM permission
+        WHERE id = #{id}
+    </delete>
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO permission (name, expression)
+        VALUES (#{name}, #{expression})
+    </insert>
+    <update id="updateByPrimaryKey">
+        UPDATE permission
+        SET name       = #{name},
+            expression = #{expression}
+        WHERE id = #{id}
+    </update>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+        SELECT
+            id,
+            name,
+            expression
+        FROM permission
+        WHERE id = #{id}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+            id,
+            name,
+            expression
+        FROM permission
+    </select>
+    <select id="queryForCount" resultType="int">
+        SELECT count(id)
+        FROM permission;
+    </select>
+    <select id="queryForList" resultType="permission">
+        SELECT
+            id,
+            name,
+            expression
+        FROM permission
+        LIMIT #{startIndex}, #{pageSize};
+    </select>
+    <select id="queryPermissionByRoleId" resultType="permission">
+        SELECT
+            id,
+            name,
+            expression
+        FROM permission
+        WHERE id IN (SELECT permission_id
+                     FROM role_permission
+                     WHERE role_id = #{roleId});
+    </select>
+    <select id="queryExpressionByEmployeeId" resultType="string">
+        SELECT expression
+        FROM permission
+        WHERE id IN (SELECT permission_id
+                     FROM role_permission
+                     WHERE role_id
+                           IN (SELECT role_id
+                               FROM employee_role
+                               WHERE employee_id = #{employeeId}));
+    </select>
+</mapper>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.wms.mapper.SaleAccountMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.wms.domain.SaleAccount">
+        <id column="id" property="id"/>
+        <result column="vdate" property="vdate"/>
+        <result column="number" property="number"/>
+        <result column="costPrice" property="costPrice"/>
+        <result column="costAmount" property="costAmount"/>
+        <result column="salePrice" property="salePrice"/>
+        <result column="saleAmount" property="saleAmount"/>
+        <result column="product_id" property="product_id"/>
+        <result column="saleman_id" property="saleman_id"/>
+        <result column="client_id" property="client_id"/>
+    </resultMap>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `saleaccount` (vdate, number, costPrice, costAmount, salePrice, saleAmount,
+                                   product_id, saleman_id, client_id)
+        VALUES (#{vdate}, #{number}, #{costPrice}, #{costAmount}, #{salePrice}, #{saleAmount},
+                #{product_id}, #{saleman_id}, #{client_id})
+    </insert>
+</mapper>
