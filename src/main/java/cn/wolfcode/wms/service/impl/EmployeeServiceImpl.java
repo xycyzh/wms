@@ -88,4 +88,9 @@ public class EmployeeServiceImpl implements IEmployeeService {
         employeeMapper.batchDeleteEmployeeRoleRelation(ids);
         employeeMapper.batchDelete(ids);
     }
+
+    @Override
+    public Employee queryUsername(String name) {
+        return employeeMapper.queryUsername(name);
+    }
 }

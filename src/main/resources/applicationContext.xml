@@ -23,8 +23,8 @@
         <property name="url" value="${jdbc.url}"/>
         <property name="username" value="${jdbc.username}"/>
         <property name="password" value="${jdbc.password}"/>
-        <property name="filters" value="config,stat" />
-        <property name="connectionProperties" value="config.decrypt=true" />
+        <property name="filters" value="config,stat"/>
+        <property name="connectionProperties" value="config.decrypt=true"/>
     </bean>
     <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource"/>

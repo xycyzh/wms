@@ -1,6 +1,7 @@
 package cn.wolfcode.wms.util;
 
 import cn.wolfcode.wms.domain.Employee;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -23,8 +24,12 @@ public class UserContext {
         }
     }
 
+//    public static Employee getUser() {
+//        return (Employee) getSession().getAttribute(USER_IN_SESSION);
+//    }
+
     public static Employee getUser() {
-        return (Employee) getSession().getAttribute(USER_IN_SESSION);
+        return (Employee) SecurityUtils.getSubject().getPrincipal();
     }
 
     public static void setExpressions(Set<String> expressions) {

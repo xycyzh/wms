@@ -20,4 +20,6 @@ public interface IEmployeeService {
     void login(Employee employee);
 
     void batchDelete(Long[] ids);
+
+    Employee queryUsername(String name);
 }

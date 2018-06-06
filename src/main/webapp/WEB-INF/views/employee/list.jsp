@@ -1,5 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -55,7 +56,7 @@
                         <th>年龄</th>
                         <th>所属部门</th>
                         <th>角色</th>
-                        <th>操作</th>
+                        <th></th>
                     </tr>
                     <tbody>
                     <c:forEach items="${pageResult.listData}" var="list">
@@ -68,10 +69,15 @@
                             <td>${list.dept.name}</td>
                             <td>${list.roleNames}</td>
                             <td>
-                                <a href="javascript:;" class="btn_redirect"
-                                   data-url="/employee/input.do?id=${list.id}">编辑</a>
-                                <a href="javascript:;" class="btn_delete"
-                                   data-url="/employee/delete.do?id=${list.id}" data-redirect="/employee/list.do">删除</a>
+                                <shiro:hasPermission name="cn.wolfcode.wms.web.controller.EmployeeController:input">
+                                    <a href="javascript:;" class="btn_redirect"
+                                       data-url="/employee/input.do?id=${list.id}">编辑</a>
+                                </shiro:hasPermission>
+                                <shiro:hasPermission name="cn.wolfcode.wms.web.controller.EmployeeController:delete">
+                                    <a href="javascript:;" class="btn_delete"
+                                       data-url="/employee/delete.do?id=${list.id}"
+                                       data-redirect="/employee/list.do">删除</a>
+                                </shiro:hasPermission>
                             </td>
                         </tr>
                     </c:forEach>
